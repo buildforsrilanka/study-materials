@@ -147,10 +147,15 @@ export async function getFormOptions() {
   }
 }
 
-export async function getMaterials() {
+export async function getMaterials(filters?: {
+  gradeId?: string
+  mediumId?: string
+  subjectId?: string
+  type?: string
+}) {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('materials')
     .select(`
       *,
@@ -159,6 +164,21 @@ export async function getMaterials() {
       subjects (id, name)
     `)
     .order('created_at', { ascending: false })
+
+  if (filters?.gradeId) {
+    query = query.eq('grade_id', filters.gradeId)
+  }
+  if (filters?.mediumId) {
+    query = query.eq('medium_id', filters.mediumId)
+  }
+  if (filters?.subjectId) {
+    query = query.eq('subject_id', filters.subjectId)
+  }
+  if (filters?.type && filters.type !== 'all') {
+    query = query.eq('type', filters.type)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     console.error('Error fetching materials:', error)

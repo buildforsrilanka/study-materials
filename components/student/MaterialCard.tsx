@@ -30,39 +30,39 @@ export default function MaterialCard({ material }: MaterialCardProps) {
 
     return (
         <Card className="h-full flex flex-col bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
+            <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start gap-4">
-                    <div className="p-2 bg-slate-100 rounded-lg">
-                        <Icon className={`w-6 h-6 ${isPdf ? 'text-red-500' : 'text-red-600'}`} />
+                    <div className="p-1.5 bg-slate-100 rounded-lg">
+                        <Icon className={`w-5 h-5 ${isPdf ? 'text-red-500' : 'text-red-600'}`} />
                     </div>
-                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200">
+                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 text-xs">
                         {material.subjects?.name || 'General'}
                     </Badge>
                 </div>
-                <CardTitle className="mt-4 text-lg font-semibold text-slate-900 line-clamp-2">
+                <CardTitle className="mt-3 text-base font-semibold text-slate-900 line-clamp-2">
                     {material.title}
                 </CardTitle>
-                <CardDescription className="line-clamp-2 text-slate-500">
+                <CardDescription className="line-clamp-2 text-xs text-slate-500 mt-1">
                     {material.description}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="flex-grow">
-                <div className="flex flex-wrap gap-2 mt-2">
-                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+            <CardContent className="p-4 pt-2 flex-grow">
+                <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs px-2 py-0.5">
                         {material.grades?.name}
                     </Badge>
-                    <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100">
+                    <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 text-xs px-2 py-0.5">
                         {material.mediums?.name}
                     </Badge>
                 </div>
             </CardContent>
-            <CardFooter className="pt-0">
+            <CardFooter className="p-4 pt-0">
                 {isPdf ? (
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white">
+                            <Button size="sm" className="w-full bg-slate-900 hover:bg-slate-800 text-white h-8 text-xs">
                                 <span className="mr-2">View Material</span>
-                                <ExternalLink className="w-4 h-4" />
+                                <ExternalLink className="w-3 h-3" />
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="w-[90vw] max-w-none h-[90vh] flex flex-col p-0 gap-0">
@@ -75,9 +75,9 @@ export default function MaterialCard({ material }: MaterialCardProps) {
                         </DialogContent>
                     </Dialog>
                 ) : (
-                    <Button asChild className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={!material.url}>
+                    <Button asChild size="sm" className="w-full bg-slate-900 hover:bg-slate-800 text-white h-8 text-xs" disabled={!material.url}>
                         <Link href={material.url} target="_blank" rel="noopener noreferrer">
-                            <Play className="w-4 h-4 mr-2" />
+                            <Play className="w-3 h-3 mr-2" />
                             <span>Watch on YouTube</span>
                         </Link>
                     </Button>
