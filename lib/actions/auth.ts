@@ -87,30 +87,7 @@ export async function signup(prevState: AuthFormState, formData: FormData): Prom
         }
     }
 
-    // Create profile record manually if trigger doesn't exist (it should, but good to be safe or explicit)
-    // Actually, we'll rely on the trigger or create it here if needed.
-    // For this implementation, let's assume we need to create it if the trigger isn't set up.
-    // But wait, Supabase Auth usually handles user creation.
-    // The `profiles` table needs to be populated.
-    // Let's try to insert into profiles if we have a user.
-
-    if (data.user) {
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-                id: data.user.id,
-                email: email,
-                full_name: fullName,
-                role: 'creator',
-            })
-            .select()
-
-        if (profileError) {
-            // If profile creation fails (e.g. duplicate), it might be handled by a trigger or we ignore
-            console.error('Profile creation error:', profileError)
-            // We don't fail the whole signup if auth succeeded, but it might cause issues later.
-        }
-    }
+    // Profile creation is now handled by the database trigger 'on_auth_user_created'
 
     return {
         success: true,
