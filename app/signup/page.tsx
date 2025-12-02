@@ -47,43 +47,63 @@ export default function SignupPage() {
                     <div className="mb-4">
                         <BackButton href="/" label="Back to Home" />
                     </div>
-                    <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                        {state?.success ? 'Check your email' : 'Create an account'}
+                    </CardTitle>
                     <CardDescription>
-                        Enter your email below to create your account
+                        {state?.success
+                            ? 'We have sent you a confirmation link to your email address.'
+                            : 'Enter your email below to create your account'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    {state?.message && (
-                        <Alert variant={state.success ? "default" : "destructive"} className="mb-4">
-                            <AlertTitle>{state.success ? "Success" : "Error"}</AlertTitle>
-                            <AlertDescription>{state.message}</AlertDescription>
-                        </Alert>
+                    {state?.success ? (
+                        <div className="flex flex-col gap-4">
+                            <Alert className="bg-green-50 border-green-200 text-green-800">
+                                <AlertTitle>Success</AlertTitle>
+                                <AlertDescription>{state.message}</AlertDescription>
+                            </Alert>
+                            <Link href="/login">
+                                <Button className="w-full">Go to Sign In</Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <>
+                            {state?.message && (
+                                <Alert variant="destructive" className="mb-4">
+                                    <AlertTitle>Error</AlertTitle>
+                                    <AlertDescription>{state.message}</AlertDescription>
+                                </Alert>
+                            )}
+                            <form action={handleSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="fullName">Full Name</Label>
+                                    <Input id="fullName" name="fullName" placeholder="John Doe" required />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input id="email" name="email" type="email" placeholder="m@example.com" required />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input id="password" name="password" type="password" required />
+                                    <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
+                                </div>
+                                <SubmitButton />
+                            </form>
+                        </>
                     )}
-                    <form action={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="fullName">Full Name</Label>
-                            <Input id="fullName" name="fullName" placeholder="John Doe" required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" name="email" type="email" placeholder="m@example.com" required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" name="password" type="password" required />
-                            <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
-                        </div>
-                        <SubmitButton />
-                    </form>
                 </CardContent>
-                <CardFooter className="flex flex-col gap-2 text-center text-sm text-muted-foreground">
-                    <div>
-                        Already have an account?{' '}
-                        <Link href="/login" className="underline underline-offset-4 hover:text-primary">
-                            Sign in
-                        </Link>
-                    </div>
-                </CardFooter>
+                {!state?.success && (
+                    <CardFooter className="flex flex-col gap-2 text-center text-sm text-muted-foreground">
+                        <div>
+                            Already have an account?{' '}
+                            <Link href="/login" className="underline underline-offset-4 hover:text-primary">
+                                Sign in
+                            </Link>
+                        </div>
+                    </CardFooter>
+                )}
             </Card>
         </div>
     )
