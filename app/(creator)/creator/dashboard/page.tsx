@@ -2,19 +2,17 @@ import { createClient } from "@/lib/supabase/server"
 import CreatorMaterialsTable from "@/components/creator/CreatorMaterialsTable"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
 import BackButton from "@/components/BackButton"
 
 export default async function DashboardPage() {
     const supabase = await createClient()
 
-    // TODO: Phase 2 - Replace with real auth check
-    // const { data: { user } } = await supabase.auth.getUser()
-    // if (!user) redirect('/login')
-    // const creatorId = user.id
-
-    // Phase 1: Mock Creator ID
-    const creatorId = '00000000-0000-0000-0000-000000000000'
+    // Phase 2: Real Auth Check
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
+    const creatorId = user.id
 
     const { data: materials, error } = await supabase
         .from('materials')

@@ -16,11 +16,8 @@ export default async function EditMaterialPage({ params }: EditMaterialPageProps
 
     // TODO: Phase 2 - Replace with real auth check
     // const { data: { user } } = await supabase.auth.getUser()
-    // if (!user) redirect('/login')
-    // const creatorId = user.id
-
-    // Phase 1: Mock Creator ID
-    const creatorId = '00000000-0000-0000-0000-000000000000'
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
 
     // Fetch material
     const { data: material, error } = await supabase
@@ -34,7 +31,7 @@ export default async function EditMaterialPage({ params }: EditMaterialPageProps
     }
 
     // Verify ownership
-    if (material.creator_id !== creatorId) {
+    if (material.creator_id !== user.id) {
         // In a real app, show 403 or redirect
         redirect('/creator/dashboard')
     }

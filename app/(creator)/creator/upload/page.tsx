@@ -2,7 +2,14 @@ import { getFormOptions } from '@/lib/actions/materials'
 import UploadForm from '@/components/creator/UploadForm'
 import BackButton from '@/components/BackButton'
 
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+
 export default async function UploadPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
+
     const { grades, mediums, subjects } = await getFormOptions()
 
     return (
