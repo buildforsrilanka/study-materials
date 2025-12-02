@@ -1,12 +1,30 @@
-import { getMaterials } from '@/lib/actions/materials'
+import { getMaterials, getFormOptions } from '@/lib/actions/materials'
 import MaterialsGrid from '@/components/student/MaterialsGrid'
+import FilterBar from '@/components/student/FilterBar'
 import { Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-export default async function BrowsePage() {
-    const materials = await getMaterials()
+interface BrowsePageProps {
+    searchParams: {
+        grade?: string
+        medium?: string
+        subject?: string
+    }
+}
+
+export default async function BrowsePage({ searchParams }: BrowsePageProps) {
+    const { grade, medium, subject } = await searchParams
+
+    const [materials, options] = await Promise.all([
+        getMaterials({
+            gradeId: grade,
+            mediumId: medium,
+            subjectId: subject
+        }),
+        getFormOptions()
+    ])
 
     // Cast the data to match the component's expected type
     // In a real app, we'd have shared types to avoid this
@@ -31,6 +49,12 @@ export default async function BrowsePage() {
                         Find study materials for your grade and subject.
                     </p>
                 </div>
+
+                <FilterBar
+                    grades={options.grades}
+                    mediums={options.mediums}
+                    subjects={options.subjects}
+                />
 
                 <Suspense fallback={
                     <div className="flex justify-center py-12">
