@@ -1,4 +1,4 @@
-# User Story: Creator Upload YouTube Video
+# User Story: Creator Add YouTube Video Link
 
 **Story ID**: US-002
 **Priority**: High
@@ -7,17 +7,17 @@
 ## User Story
 
 **As a** creator
-**I want to** upload YouTube video links as learning materials
+**I want to** add YouTube video links as learning materials
 **So that** students can access video-based educational content
 
 ## Acceptance Criteria
 
-- [ ] Creator can toggle material type to "YouTube" in upload form
+- [ ] Creator can toggle material type to "YouTube" in add material form
 - [ ] Form includes required fields: title, description, YouTube URL
 - [ ] Form includes dropdowns for: grade (1-14), medium (Sinhala/Tamil/English), subject
 - [ ] YouTube URL is validated (supports youtube.com and youtu.be formats)
-- [ ] Material displays with play icon after successful upload
-- [ ] Success message shown after upload
+- [ ] Material displays with play icon after successful addition
+- [ ] Success message shown after addition
 - [ ] Form resets or redirects after successful submission
 - [ ] Error messages display for invalid YouTube URLs
 

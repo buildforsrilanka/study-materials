@@ -1,4 +1,4 @@
-# User Story: Creator Upload PDF Material
+# User Story: Creator Add PDF Link
 
 **Story ID**: US-001
 **Priority**: High
@@ -7,19 +7,19 @@
 ## User Story
 
 **As a** creator
-**I want to** upload PDF learning materials via Google Drive links
+**I want to** add PDF learning materials via Google Drive links
 **So that** students can access educational documents
 
 ## Acceptance Criteria
 
-- [ ] Creator can access upload form with material type selector
+- [ ] Creator can access add material form with material type selector
 - [ ] Form includes required fields: title, description, Google Drive URL
 - [ ] Form includes dropdowns for: grade (1-14), medium (Sinhala/Tamil/English), subject
 - [ ] Google Drive URL is validated to ensure it's a valid shareable link
-- [ ] Material displays with document icon after successful upload
-- [ ] Success message shown after upload
+- [ ] Material displays with document icon after successful addition
+- [ ] Success message shown after addition
 - [ ] Form resets or redirects after successful submission
-- [ ] Error messages display for invalid inputs or failed uploads
+- [ ] Error messages display for invalid inputs or failed additions
 
 ## Technical Notes
 
