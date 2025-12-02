@@ -252,7 +252,7 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
 
                         <Button
                             type="submit"
-                            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white"
+                            className="w-full mt-6 bg-slate-900 hover:bg-slate-800 text-white"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? (

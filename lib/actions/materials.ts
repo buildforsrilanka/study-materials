@@ -51,7 +51,7 @@ export async function createMaterial(prevState: MaterialFormState, formData: For
   // Additional validation based on type
   if (type === 'pdf') {
     if (!url.includes('drive.google.com')) {
-       return {
+      return {
         errors: { url: ['Must be a valid Google Drive link'] },
         message: 'Invalid URL for PDF material',
       }
@@ -76,30 +76,30 @@ export async function createMaterial(prevState: MaterialFormState, formData: For
   // In a real app, we would strictly require a user.
   // For now, we'll assume the user is authenticated or we handle the error.
   if (!creator_id) {
-      // Fallback for development if needed, or return error
-      // For now, let's try to find the mock profile if in dev mode
-      // But strictly speaking, we should require auth.
-      // Let's return an error if not authenticated.
-      // However, the schema allows a mock creator ID '00000000-0000-0000-0000-000000000000'
-      // We could use that if no user is logged in, for testing purposes.
-      // Let's check if we are in dev environment or just fail.
-      // Better to fail and require login, but for this specific user request context
-      // where auth might not be fully set up in the UI flow yet:
-      
-      // Check if mock profile exists and use it if no auth
-      const { data: mockProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', '00000000-0000-0000-0000-000000000000')
-        .single()
-      
-      if (mockProfile) {
-        creator_id = mockProfile.id
-      } else {
-         return {
-          message: 'You must be logged in to create materials.',
-        }
+    // Fallback for development if needed, or return error
+    // For now, let's try to find the mock profile if in dev mode
+    // But strictly speaking, we should require auth.
+    // Let's return an error if not authenticated.
+    // However, the schema allows a mock creator ID '00000000-0000-0000-0000-000000000000'
+    // We could use that if no user is logged in, for testing purposes.
+    // Let's check if we are in dev environment or just fail.
+    // Better to fail and require login, but for this specific user request context
+    // where auth might not be fully set up in the UI flow yet:
+
+    // Check if mock profile exists and use it if no auth
+    const { data: mockProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .single()
+
+    if (mockProfile) {
+      creator_id = mockProfile.id
+    } else {
+      return {
+        message: 'You must be logged in to create materials.',
       }
+    }
   }
 
   try {
@@ -145,4 +145,25 @@ export async function getFormOptions() {
     mediums: mediums.data || [],
     subjects: subjects.data || [],
   }
+}
+
+export async function getMaterials() {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('materials')
+    .select(`
+      *,
+      grades (id, name),
+      mediums (id, name),
+      subjects (id, name)
+    `)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching materials:', error)
+    return []
+  }
+
+  return data || []
 }
