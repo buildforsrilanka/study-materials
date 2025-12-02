@@ -319,5 +319,44 @@ ORDER BY tablename;
 --       ON DELETE RESTRICT;
 --
 --     RAISE NOTICE 'Materials table updated: subject_id is now NOT NULL';
---   END IF;
--- END $$;
+  END IF;
+END $$;
+
+-- =============================================
+-- TRIGGER: HANDLE NEW USER
+-- Automatically create profile when a new user signs up
+-- =============================================
+
+-- Function to handle new user insertion
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, full_name, role)
+  VALUES (
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'full_name',
+    COALESCE(new.raw_user_meta_data->>'role', 'creator') -- Default to creator
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to call the function
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- =============================================
+-- FIX: Insert profiles for existing users who missed the trigger
+-- =============================================
+INSERT INTO public.profiles (id, email, full_name, role)
+SELECT 
+  id, 
+  email, 
+  raw_user_meta_data->>'full_name',
+  COALESCE(raw_user_meta_data->>'role', 'creator')
+FROM auth.users
+WHERE id NOT IN (SELECT id FROM public.profiles)
+ON CONFLICT (id) DO NOTHING;

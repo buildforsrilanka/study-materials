@@ -83,33 +83,9 @@ export async function createMaterial(prevState: MaterialFormState, formData: For
 
   let creator_id = user?.id
 
-  // DEV-FRIENDLY: If no user, check if we can use the mock creator (only if RLS allows it)
-  // In a real app, we would strictly require a user.
-  // For now, we'll assume the user is authenticated or we handle the error.
   if (!creator_id) {
-    // Fallback for development if needed, or return error
-    // For now, let's try to find the mock profile if in dev mode
-    // But strictly speaking, we should require auth.
-    // Let's return an error if not authenticated.
-    // However, the schema allows a mock creator ID '00000000-0000-0000-0000-000000000000'
-    // We could use that if no user is logged in, for testing purposes.
-    // Let's check if we are in dev environment or just fail.
-    // Better to fail and require login, but for this specific user request context
-    // where auth might not be fully set up in the UI flow yet:
-
-    // Check if mock profile exists and use it if no auth
-    const { data: mockProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', '00000000-0000-0000-0000-000000000000')
-      .single()
-
-    if (mockProfile) {
-      creator_id = mockProfile.id
-    } else {
-      return {
-        message: 'You must be logged in to create materials.',
-      }
+    return {
+      message: 'You must be logged in to create materials.',
     }
   }
 
@@ -195,20 +171,10 @@ export async function updateMaterial(id: string, prevState: MaterialFormState, f
   const { data: { user } } = await supabase.auth.getUser()
   let creator_id = user?.id
 
-  // Phase 1: Mock Creator ID fallback
+  // Phase 2: Real Auth
   if (!creator_id) {
-    const { data: mockProfile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', '00000000-0000-0000-0000-000000000000')
-      .single()
-
-    if (mockProfile) {
-      creator_id = mockProfile.id
-    } else {
-      return {
-        message: 'You must be logged in to update materials.',
-      }
+    return {
+      message: 'You must be logged in to update materials.',
     }
   }
 
