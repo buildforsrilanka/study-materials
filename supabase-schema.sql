@@ -2,6 +2,22 @@
 -- STUDY MATERIALS PLATFORM - DATABASE SCHEMA
 -- Run this entire file in Supabase SQL Editor
 -- =============================================
+-- This script will:
+-- 1. Drop all existing tables (fresh start)
+-- 2. Create all tables with proper structure
+-- 3. Seed default data
+-- 4. Set up RLS policies (dev-friendly, allows MOCK_CREATOR_ID)
+-- =============================================
+
+-- =============================================
+-- DROP EXISTING TABLES (Fresh Start)
+-- =============================================
+-- Drop in correct order to handle foreign key dependencies
+DROP TABLE IF EXISTS materials CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+DROP TABLE IF EXISTS subjects CASCADE;
+DROP TABLE IF EXISTS mediums CASCADE;
+DROP TABLE IF EXISTS grades CASCADE;
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -64,7 +80,7 @@ CREATE TABLE IF NOT EXISTS materials (
   description TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('pdf', 'youtube')),
   url TEXT NOT NULL,
-  subject_id UUID REFERENCES subjects(id) ON DELETE SET NULL,
+  subject_id UUID NOT NULL REFERENCES subjects(id) ON DELETE RESTRICT,
   grade_id UUID NOT NULL REFERENCES grades(id) ON DELETE RESTRICT,
   medium_id UUID NOT NULL REFERENCES mediums(id) ON DELETE RESTRICT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -198,24 +214,39 @@ CREATE POLICY "Materials are viewable by everyone"
   ON materials FOR SELECT
   USING (true);
 
-CREATE POLICY "Creators can insert their own materials"
+-- DEV-FRIENDLY: Allows inserts with MOCK_CREATOR_ID (no auth required)
+-- When implementing US-009 (Authentication), replace with stricter policy
+CREATE POLICY "Creators can insert materials (dev-friendly)"
   ON materials FOR INSERT
   WITH CHECK (
-    auth.uid() = creator_id
-    AND EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-      AND profiles.role = 'creator'
+    -- Allow if using the mock creator ID (development without auth)
+    creator_id = '00000000-0000-0000-0000-000000000000'
+    -- OR if authenticated and role is creator (production)
+    OR (
+      auth.uid() = creator_id
+      AND EXISTS (
+        SELECT 1 FROM profiles
+        WHERE profiles.id = auth.uid()
+        AND profiles.role = 'creator'
+      )
     )
   );
 
-CREATE POLICY "Creators can update their own materials"
+-- DEV-FRIENDLY: Allows updates with MOCK_CREATOR_ID
+CREATE POLICY "Creators can update materials (dev-friendly)"
   ON materials FOR UPDATE
-  USING (auth.uid() = creator_id);
+  USING (
+    creator_id = '00000000-0000-0000-0000-000000000000'
+    OR auth.uid() = creator_id
+  );
 
-CREATE POLICY "Creators can delete their own materials"
+-- DEV-FRIENDLY: Allows deletes with MOCK_CREATOR_ID
+CREATE POLICY "Creators can delete materials (dev-friendly)"
   ON materials FOR DELETE
-  USING (auth.uid() = creator_id);
+  USING (
+    creator_id = '00000000-0000-0000-0000-000000000000'
+    OR auth.uid() = creator_id
+  );
 
 
 -- =============================================
@@ -254,3 +285,39 @@ FROM pg_tables
 WHERE schemaname = 'public'
   AND tablename IN ('profiles', 'subjects', 'materials', 'grades', 'mediums')
 ORDER BY tablename;
+
+-- =============================================
+-- MIGRATION: Update existing materials table
+-- Run this section ONLY if you already created the materials table
+-- with subject_id as nullable and need to update it
+-- =============================================
+
+-- Check if materials table exists and has nullable subject_id
+-- DO $$
+-- BEGIN
+--   -- Only run if materials table exists
+--   IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'materials') THEN
+--
+--     -- Update any existing materials without a subject to have a default subject
+--     UPDATE materials
+--     SET subject_id = (SELECT id FROM subjects ORDER BY name LIMIT 1)
+--     WHERE subject_id IS NULL;
+--
+--     -- Make subject_id NOT NULL
+--     ALTER TABLE materials
+--     ALTER COLUMN subject_id SET NOT NULL;
+--
+--     -- Drop the old foreign key constraint if it exists
+--     ALTER TABLE materials
+--     DROP CONSTRAINT IF EXISTS materials_subject_id_fkey;
+--
+--     -- Add new foreign key constraint with RESTRICT
+--     ALTER TABLE materials
+--     ADD CONSTRAINT materials_subject_id_fkey
+--       FOREIGN KEY (subject_id)
+--       REFERENCES subjects(id)
+--       ON DELETE RESTRICT;
+--
+--     RAISE NOTICE 'Materials table updated: subject_id is now NOT NULL';
+--   END IF;
+-- END $$;
