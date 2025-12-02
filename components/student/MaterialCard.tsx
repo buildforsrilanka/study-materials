@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { FileText, Youtube, ExternalLink } from "lucide-react"
+import { FileText, Youtube, ExternalLink, Play } from "lucide-react"
 import Link from "next/link"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import PDFViewer from "./PDFViewer"
@@ -75,10 +75,10 @@ export default function MaterialCard({ material }: MaterialCardProps) {
                         </DialogContent>
                     </Dialog>
                 ) : (
-                    <Button asChild className="w-full bg-slate-900 hover:bg-slate-800 text-white">
+                    <Button asChild className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={!material.url}>
                         <Link href={material.url} target="_blank" rel="noopener noreferrer">
-                            <span className="mr-2">View Material</span>
-                            <ExternalLink className="w-4 h-4" />
+                            <Play className="w-4 h-4 mr-2" />
+                            <span>Watch on YouTube</span>
                         </Link>
                     </Button>
                 )}
