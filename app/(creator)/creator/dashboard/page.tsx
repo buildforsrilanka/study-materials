@@ -3,6 +3,7 @@ import CreatorMaterialsTable from "@/components/creator/CreatorMaterialsTable"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
+import BackButton from "@/components/BackButton"
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -48,6 +49,9 @@ export default async function DashboardPage() {
 
     return (
         <div className="container mx-auto py-10 px-4">
+            <div className="mb-6">
+                <BackButton href="/" label="Back to Home" />
+            </div>
             <div className="flex justify-between items-center mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Creator Dashboard</h1>

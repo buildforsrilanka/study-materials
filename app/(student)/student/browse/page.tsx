@@ -7,6 +7,7 @@ import MaterialCount from '@/components/student/MaterialCount'
 import MaterialsTableSkeleton from '@/components/student/MaterialsTableSkeleton'
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
+import BackButton from '@/components/BackButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         <div className="container mx-auto py-10 px-4">
             <div className="space-y-8">
                 <div className="space-y-2">
+                    <BackButton href="/" label="Back to Home" />
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Browse Materials</h1>
                     <p className="text-slate-500">
                         Find study materials for your grade and subject.

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { getFormOptions } from "@/lib/actions/materials"
 import UploadForm from "@/components/creator/UploadForm"
+import BackButton from "@/components/BackButton"
 import { notFound, redirect } from "next/navigation"
 
 interface EditMaterialPageProps {
@@ -43,13 +44,18 @@ export default async function EditMaterialPage({ params }: EditMaterialPageProps
 
     return (
         <div className="container mx-auto py-10 px-4">
-            <UploadForm
-                grades={grades}
-                mediums={mediums}
-                subjects={subjects}
-                initialData={material}
-                materialId={id}
-            />
+            <div className="max-w-4xl mx-auto space-y-8">
+                <div className="space-y-2">
+                    <BackButton href="/creator/dashboard" />
+                </div>
+                <UploadForm
+                    grades={grades}
+                    mediums={mediums}
+                    subjects={subjects}
+                    initialData={material}
+                    materialId={id}
+                />
+            </div>
         </div>
     )
 }
