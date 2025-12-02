@@ -151,6 +151,7 @@ export async function getMaterials(filters?: {
   gradeId?: string
   mediumId?: string
   subjectId?: string
+  type?: string
 }) {
   const supabase = await createClient()
 
@@ -172,6 +173,9 @@ export async function getMaterials(filters?: {
   }
   if (filters?.subjectId) {
     query = query.eq('subject_id', filters.subjectId)
+  }
+  if (filters?.type && filters.type !== 'all') {
+    query = query.eq('type', filters.type)
   }
 
   const { data, error } = await query

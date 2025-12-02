@@ -1,44 +1,27 @@
-import { getMaterials, getFormOptions } from '@/lib/actions/materials'
-import MaterialsGrid from '@/components/student/MaterialsGrid'
-import FilterBar from '@/components/student/FilterBar'
+import { getFormOptions } from '@/lib/actions/materials'
+import MaterialsTable from '@/components/student/MaterialsTable'
+import FilterSidebar from '@/components/student/FilterSidebar'
+import TypeToggle from '@/components/student/TypeToggle'
+import MaterialsList from '@/components/student/MaterialsList'
+import MaterialCount from '@/components/student/MaterialCount'
+import MaterialsTableSkeleton from '@/components/student/MaterialsTableSkeleton'
 import { Suspense } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const dynamic = 'force-dynamic'
 
 interface BrowsePageProps {
-    searchParams: {
+    searchParams: Promise<{
         grade?: string
         medium?: string
         subject?: string
-    }
+        type?: string
+    }>
 }
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
-    const { grade, medium, subject } = await searchParams
-
-    const [materials, options] = await Promise.all([
-        getMaterials({
-            gradeId: grade,
-            mediumId: medium,
-            subjectId: subject
-        }),
-        getFormOptions()
-    ])
-
-    // Cast the data to match the component's expected type
-    // In a real app, we'd have shared types to avoid this
-    const formattedMaterials = materials.map((m: any) => ({
-        id: m.id,
-        title: m.title,
-        description: m.description,
-        type: m.type as 'pdf' | 'youtube',
-        url: m.url,
-        created_at: m.created_at,
-        grades: m.grades,
-        mediums: m.mediums,
-        subjects: m.subjects
-    }))
+    const resolvedParams = await searchParams
+    const options = await getFormOptions()
 
     return (
         <div className="container mx-auto py-10 px-4">
@@ -50,19 +33,27 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     </p>
                 </div>
 
-                <FilterBar
-                    grades={options.grades}
-                    mediums={options.mediums}
-                    subjects={options.subjects}
-                />
-
-                <Suspense fallback={
-                    <div className="flex justify-center py-12">
-                        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-8">
+                    <div>
+                        <FilterSidebar
+                            grades={options.grades}
+                            mediums={options.mediums}
+                            subjects={options.subjects}
+                        />
                     </div>
-                }>
-                    <MaterialsGrid materials={formattedMaterials} />
-                </Suspense>
+
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between px-1 h-9">
+                            <Suspense fallback={<Skeleton className="w-24 h-5" />}>
+                                <MaterialCount searchParams={resolvedParams} />
+                            </Suspense>
+                            <TypeToggle />
+                        </div>
+                        <Suspense fallback={<MaterialsTableSkeleton />}>
+                            <MaterialsList searchParams={resolvedParams} />
+                        </Suspense>
+                    </div>
+                </div>
             </div>
         </div>
     )
