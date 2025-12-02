@@ -32,19 +32,35 @@ const formSchema = z.object({
     medium_id: z.string().uuid('Please select a medium'),
     subject_id: z.string().uuid('Please select a subject'),
 }).superRefine((data, ctx) => {
-    if (data.type === 'pdf' && !data.url.includes('drive.google.com')) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Must be a valid Google Drive link',
-            path: ['url'],
-        })
+    if (data.type === 'pdf') {
+        if (!data.url.includes('drive.google.com')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Must be a valid Google Drive link',
+                path: ['url'],
+            })
+        } else if (data.url.includes('/folders/')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Must be a file link, not a folder link',
+                path: ['url'],
+            })
+        }
     }
-    if (data.type === 'youtube' && !data.url.includes('youtube.com') && !data.url.includes('youtu.be')) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'Must be a valid YouTube link',
-            path: ['url'],
-        })
+    if (data.type === 'youtube') {
+        if (!data.url.includes('youtube.com') && !data.url.includes('youtu.be')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Must be a valid YouTube link',
+                path: ['url'],
+            })
+        } else if (data.url.includes('list=')) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Must be a video link, not a playlist',
+                path: ['url'],
+            })
+        }
     }
 })
 

@@ -56,12 +56,22 @@ export async function createMaterial(prevState: MaterialFormState, formData: For
         errors: { url: ['Must be a valid Google Drive link'] },
         message: 'Invalid URL for PDF material',
       }
+    } else if (url.includes('/folders/')) {
+      return {
+        errors: { url: ['Must be a file link, not a folder link'] },
+        message: 'Invalid URL: Folders are not allowed',
+      }
     }
   } else if (type === 'youtube') {
     if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
       return {
         errors: { url: ['Must be a valid YouTube link'] },
         message: 'Invalid URL for YouTube material',
+      }
+    } else if (url.includes('list=')) {
+      return {
+        errors: { url: ['Must be a video link, not a playlist'] },
+        message: 'Invalid URL: Playlists are not allowed',
       }
     }
   }
@@ -159,12 +169,22 @@ export async function updateMaterial(id: string, prevState: MaterialFormState, f
         errors: { url: ['Must be a valid Google Drive link'] },
         message: 'Invalid URL for PDF material',
       }
+    } else if (url.includes('/folders/')) {
+      return {
+        errors: { url: ['Must be a file link, not a folder link'] },
+        message: 'Invalid URL: Folders are not allowed',
+      }
     }
   } else if (type === 'youtube') {
     if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
       return {
         errors: { url: ['Must be a valid YouTube link'] },
         message: 'Invalid URL for YouTube material',
+      }
+    } else if (url.includes('list=')) {
+      return {
+        errors: { url: ['Must be a video link, not a playlist'] },
+        message: 'Invalid URL: Playlists are not allowed',
       }
     }
   }
