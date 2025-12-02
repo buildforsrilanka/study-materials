@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { createMaterial } from '@/lib/actions/materials'
+import { createMaterial, updateMaterial } from '@/lib/actions/materials'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, FileText, Youtube } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 // Schema for client-side validation
 const formSchema = z.object({
@@ -58,12 +59,22 @@ interface UploadFormProps {
     grades: Option[]
     mediums: Option[]
     subjects: Option[]
+    initialData?: {
+        title: string
+        description: string
+        type: 'pdf' | 'youtube'
+        url: string
+        grade_id: string
+        medium_id: string
+        subject_id: string
+    }
+    materialId?: string
 }
 
-export default function UploadForm({ grades, mediums, subjects }: UploadFormProps) {
+export default function UploadForm({ grades, mediums, subjects, initialData, materialId }: UploadFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitError, setSubmitError] = useState<string | null>(null)
-    const [activeTab, setActiveTab] = useState<'pdf' | 'youtube'>('pdf')
+    const [activeTab, setActiveTab] = useState<'pdf' | 'youtube'>(initialData?.type || 'pdf')
 
     const {
         register,
@@ -75,18 +86,20 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
     } = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            type: 'pdf',
-            title: '',
-            description: '',
-            url: '',
-            grade_id: '',
-            medium_id: '',
-            subject_id: '',
+            type: initialData?.type || 'pdf',
+            title: initialData?.title || '',
+            description: initialData?.description || '',
+            url: initialData?.url || '',
+            grade_id: initialData?.grade_id || '',
+            medium_id: initialData?.medium_id || '',
+            subject_id: initialData?.subject_id || '',
         },
     })
 
     // Watch type to update validation logic if needed, though superRefine handles it
     const currentType = watch('type')
+
+    const router = useRouter()
 
     const onSubmit = async (data: FormData) => {
         setIsSubmitting(true)
@@ -98,18 +111,22 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
         })
 
         try {
-            // We can't directly use useFormState with react-hook-form's handleSubmit easily in this structure
-            // So we'll call the action directly and handle the response
-            const result = await createMaterial(null, formData)
+            let result;
+            if (materialId) {
+                result = await updateMaterial(materialId, null, formData)
+            } else {
+                result = await createMaterial(null, formData)
+            }
 
             if (result?.errors) {
                 // Handle server-side errors
                 setSubmitError(result.message || 'Validation failed')
-            } else if (result?.message) {
+            } else if (result?.message && !result.success) {
                 setSubmitError(result.message)
-            } else {
-                // Success (redirect handled in action, but if we are here, maybe it didn't redirect yet)
-                reset()
+            } else if (result?.success) {
+                // Success
+                if (!materialId) reset()
+                router.push('/creator/dashboard')
             }
         } catch (error) {
             setSubmitError('An unexpected error occurred')
@@ -126,12 +143,18 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
         // Clear URL error when switching types
     }
 
+    const isEditing = !!materialId
+
     return (
         <Card className="w-full max-w-2xl mx-auto bg-white text-slate-900 border-slate-200 shadow-sm">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold text-slate-900">Add Learning Material</CardTitle>
+                <CardTitle className="text-2xl font-bold text-slate-900">
+                    {isEditing ? 'Edit Learning Material' : 'Add Learning Material'}
+                </CardTitle>
                 <CardDescription className="text-slate-500">
-                    Share educational content with students. You can add PDF documents via Google Drive or YouTube videos.
+                    {isEditing
+                        ? 'Update the details of your learning material.'
+                        : 'Share educational content with students. You can add PDF documents via Google Drive or YouTube videos.'}
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -199,7 +222,10 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="grade" className="text-slate-900">Grade <span className="text-red-500">*</span></Label>
-                                    <Select onValueChange={(value) => setValue('grade_id', value, { shouldValidate: true })}>
+                                    <Select
+                                        onValueChange={(value) => setValue('grade_id', value, { shouldValidate: true })}
+                                        defaultValue={initialData?.grade_id}
+                                    >
                                         <SelectTrigger className="bg-white border-slate-300 text-slate-900">
                                             <SelectValue placeholder="Select Grade" />
                                         </SelectTrigger>
@@ -216,7 +242,10 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
 
                                 <div className="space-y-2">
                                     <Label htmlFor="medium" className="text-slate-900">Medium <span className="text-red-500">*</span></Label>
-                                    <Select onValueChange={(value) => setValue('medium_id', value, { shouldValidate: true })}>
+                                    <Select
+                                        onValueChange={(value) => setValue('medium_id', value, { shouldValidate: true })}
+                                        defaultValue={initialData?.medium_id}
+                                    >
                                         <SelectTrigger className="bg-white border-slate-300 text-slate-900">
                                             <SelectValue placeholder="Select Medium" />
                                         </SelectTrigger>
@@ -233,7 +262,10 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
 
                                 <div className="space-y-2">
                                     <Label htmlFor="subject" className="text-slate-900">Subject <span className="text-red-500">*</span></Label>
-                                    <Select onValueChange={(value) => setValue('subject_id', value, { shouldValidate: true })}>
+                                    <Select
+                                        onValueChange={(value) => setValue('subject_id', value, { shouldValidate: true })}
+                                        defaultValue={initialData?.subject_id}
+                                    >
                                         <SelectTrigger className="bg-white border-slate-300 text-slate-900">
                                             <SelectValue placeholder="Select Subject" />
                                         </SelectTrigger>
@@ -258,10 +290,10 @@ export default function UploadForm({ grades, mediums, subjects }: UploadFormProp
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Adding Material...
+                                    {isEditing ? 'Updating Material...' : 'Adding Material...'}
                                 </>
                             ) : (
-                                'Add Material'
+                                isEditing ? 'Update Material' : 'Add Material'
                             )}
                         </Button>
                     </Tabs>

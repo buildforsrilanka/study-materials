@@ -26,6 +26,7 @@ export type MaterialFormState = {
     _form?: string[]
   }
   message?: string
+  success?: boolean
 } | null
 
 export async function createMaterial(prevState: MaterialFormState, formData: FormData): Promise<MaterialFormState> {
@@ -128,7 +129,114 @@ export async function createMaterial(prevState: MaterialFormState, formData: For
   }
 
   revalidatePath('/creator/dashboard')
-  redirect('/creator/dashboard')
+  return { success: true, message: 'Material created successfully' }
+}
+
+export async function updateMaterial(id: string, prevState: MaterialFormState, formData: FormData): Promise<MaterialFormState> {
+  const validatedFields = materialSchema.safeParse({
+    title: formData.get('title'),
+    description: formData.get('description'),
+    type: formData.get('type'),
+    url: formData.get('url'),
+    grade_id: formData.get('grade_id'),
+    medium_id: formData.get('medium_id'),
+    subject_id: formData.get('subject_id'),
+  })
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Update Material.',
+    }
+  }
+
+  const { title, description, type, url, grade_id, medium_id, subject_id } = validatedFields.data
+
+  // Additional validation based on type
+  if (type === 'pdf') {
+    if (!url.includes('drive.google.com')) {
+      return {
+        errors: { url: ['Must be a valid Google Drive link'] },
+        message: 'Invalid URL for PDF material',
+      }
+    }
+  } else if (type === 'youtube') {
+    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+      return {
+        errors: { url: ['Must be a valid YouTube link'] },
+        message: 'Invalid URL for YouTube material',
+      }
+    }
+  }
+
+  const supabase = await createClient()
+
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+  let creator_id = user?.id
+
+  // Phase 1: Mock Creator ID fallback
+  if (!creator_id) {
+    const { data: mockProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', '00000000-0000-0000-0000-000000000000')
+      .single()
+
+    if (mockProfile) {
+      creator_id = mockProfile.id
+    } else {
+      return {
+        message: 'You must be logged in to update materials.',
+      }
+    }
+  }
+
+  // Verify ownership
+  const { data: existingMaterial } = await supabase
+    .from('materials')
+    .select('creator_id')
+    .eq('id', id)
+    .single()
+
+  if (!existingMaterial) {
+    return { message: 'Material not found' }
+  }
+
+  if (existingMaterial.creator_id !== creator_id) {
+    return { message: 'Unauthorized: You can only update your own materials' }
+  }
+
+  try {
+    const { error } = await supabase
+      .from('materials')
+      .update({
+        title,
+        description,
+        type,
+        url,
+        grade_id,
+        medium_id,
+        subject_id,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Database Error:', error)
+      return {
+        message: 'Database Error: Failed to Update Material.',
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error)
+    return {
+      message: 'Failed to Update Material.',
+    }
+  }
+
+  revalidatePath('/creator/dashboard')
+  return { success: true, message: 'Material updated successfully' }
 }
 
 export async function getFormOptions() {
