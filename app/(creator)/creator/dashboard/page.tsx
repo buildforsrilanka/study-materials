@@ -1,12 +1,27 @@
 import { createClient } from "@/lib/supabase/server"
+import { getCreatorMaterials } from "@/lib/actions/materials"
 import CreatorMaterialsTable from "@/components/creator/CreatorMaterialsTable"
+import ItemsPerPageDropdown from "@/components/ItemsPerPageDropdown"
+import TypeToggle from "@/components/TypeToggle"
+import SearchInput from "@/components/SearchInput"
+import CreatorMaterialsTableSkeleton from "@/components/creator/CreatorMaterialsTableSkeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { Plus } from "lucide-react"
 import BackButton from "@/components/BackButton"
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+    searchParams: Promise<{
+        page?: string
+        limit?: string
+        type?: string
+        search?: string
+    }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
     const supabase = await createClient()
 
     // Phase 2: Real Auth Check
@@ -14,26 +29,11 @@ export default async function DashboardPage() {
     if (!user) redirect('/login')
     const creatorId = user.id
 
-    const { data: materials, error } = await supabase
-        .from('materials')
-        .select(`
-            id,
-            title,
-            description,
-            type,
-            url,
-            created_at,
-            grades (name),
-            mediums (name),
-            subjects (name)
-        `)
-        .eq('creator_id', creatorId)
-        .order('created_at', { ascending: false })
-
-    if (error) {
-        console.error("Error fetching materials:", error)
-        return <div>Error loading materials</div>
-    }
+    const page = Number((await searchParams).page) || 1
+    const limit = Number((await searchParams).limit) || 10
+    const type = (await searchParams).type
+    const search = (await searchParams).search
+    const { data: materials, totalPages } = await getCreatorMaterials(page, limit, type, search)
 
     // Transform the data to match the expected type
     // Supabase returns arrays for joined tables if not using single(), but our types expect objects
@@ -65,7 +65,21 @@ export default async function DashboardPage() {
                 </Button>
             </div>
 
-            <CreatorMaterialsTable materials={formattedMaterials as any} />
+            <div className="flex justify-between items-center mb-4">
+                <SearchInput />
+                <div className="flex items-center gap-6">
+                    <ItemsPerPageDropdown />
+                    <TypeToggle />
+                </div>
+            </div>
+
+            <Suspense fallback={<CreatorMaterialsTableSkeleton />}>
+                <CreatorMaterialsTable
+                    materials={formattedMaterials as any}
+                    currentPage={page}
+                    totalPages={totalPages}
+                />
+            </Suspense>
         </div>
     )
 }

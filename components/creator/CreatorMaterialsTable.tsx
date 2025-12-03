@@ -13,6 +13,7 @@ import { FileText, Youtube, Pencil } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import DeleteMaterialButton from "./DeleteMaterialButton"
+import Pagination from "@/components/Pagination"
 
 type Material = {
     id: string
@@ -28,9 +29,11 @@ type Material = {
 
 interface CreatorMaterialsTableProps {
     materials: Material[]
+    currentPage: number
+    totalPages: number
 }
 
-export default function CreatorMaterialsTable({ materials }: CreatorMaterialsTableProps) {
+export default function CreatorMaterialsTable({ materials, currentPage, totalPages }: CreatorMaterialsTableProps) {
     if (materials.length === 0) {
         return (
             <div className="text-center py-12 border rounded-lg bg-white">
@@ -41,70 +44,78 @@ export default function CreatorMaterialsTable({ materials }: CreatorMaterialsTab
     }
 
     return (
-        <div className="rounded-md border bg-white">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[50px]">Type</TableHead>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Medium</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {materials.map((material) => {
-                        const isPdf = material.type === 'pdf'
-                        const Icon = isPdf ? FileText : Youtube
+        <div className="space-y-4">
+            <div className="rounded-md border bg-white">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[50px]">Type</TableHead>
+                            <TableHead>Title</TableHead>
+                            <TableHead>Subject</TableHead>
+                            <TableHead>Grade</TableHead>
+                            <TableHead>Medium</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {materials.map((material) => {
+                            const isPdf = material.type === 'pdf'
+                            const Icon = isPdf ? FileText : Youtube
 
-                        return (
-                            <TableRow key={material.id}>
-                                <TableCell>
-                                    <div className="p-2 bg-slate-100 rounded-lg w-fit">
-                                        <Icon className={`w-4 h-4 ${isPdf ? 'text-red-500' : 'text-red-600'}`} />
-                                    </div>
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                    <div className="flex flex-col">
-                                        <span className="line-clamp-1">{material.title}</span>
-                                        <span className="text-xs text-muted-foreground line-clamp-1">{material.description}</span>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-normal">
-                                        {material.subjects?.name || 'General'}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-normal">
-                                        {material.grades?.name}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 font-normal">
-                                        {material.mediums?.name}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer" asChild>
-                                            <Link href={`/creator/edit/${material.id}`}>
-                                                <Pencil className="h-4 w-4" />
-                                                <span className="sr-only">Edit</span>
-                                            </Link>
-                                        </Button>
-                                        <DeleteMaterialButton
-                                            materialId={material.id}
-                                            materialTitle={material.title}
-                                        />
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        )
-                    })}
-                </TableBody>
-            </Table>
+                            return (
+                                <TableRow key={material.id}>
+                                    <TableCell>
+                                        <div className="p-2 bg-slate-100 rounded-lg w-fit">
+                                            <Icon className={`w-4 h-4 ${isPdf ? 'text-red-500' : 'text-red-600'}`} />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                        <div className="flex flex-col">
+                                            <span className="line-clamp-1">{material.title}</span>
+                                            <span className="text-xs text-muted-foreground line-clamp-1">{material.description}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-normal">
+                                            {material.subjects?.name || 'General'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100 font-normal">
+                                            {material.grades?.name}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 font-normal">
+                                            {material.mediums?.name}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50 cursor-pointer" asChild>
+                                                <Link href={`/creator/edit/${material.id}`}>
+                                                    <Pencil className="h-4 w-4" />
+                                                    <span className="sr-only">Edit</span>
+                                                </Link>
+                                            </Button>
+                                            <DeleteMaterialButton
+                                                materialId={material.id}
+                                                materialTitle={material.title}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })}
+                    </TableBody>
+                </Table>
+            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                baseUrl="/creator/dashboard"
+                className="justify-end"
+            />
         </div>
     )
 }
