@@ -1,13 +1,14 @@
 import { getFormOptions } from '@/lib/actions/materials'
 import MaterialsTable from '@/components/student/MaterialsTable'
 import FilterSidebar from '@/components/student/FilterSidebar'
-import TypeToggle from '@/components/student/TypeToggle'
+import TypeToggle from '@/components/TypeToggle'
 import MaterialsList from '@/components/student/MaterialsList'
-import MaterialCount from '@/components/student/MaterialCount'
 import MaterialsTableSkeleton from '@/components/student/MaterialsTableSkeleton'
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import BackButton from '@/components/BackButton'
+import SidebarPagination from '@/components/student/SidebarPagination'
+import ItemsPerPageDropdown from '@/components/ItemsPerPageDropdown'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,8 @@ interface BrowsePageProps {
         medium?: string
         subject?: string
         type?: string
+        page?: string
+        limit?: string
     }>
 }
 
@@ -42,13 +45,14 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                             mediums={options.mediums}
                             subjects={options.subjects}
                         />
+                        <div className="mt-6">
+                            <SidebarPagination searchParams={resolvedParams} />
+                        </div>
                     </div>
 
                     <div className="space-y-4">
                         <div className="flex items-center justify-between px-1 h-9">
-                            <Suspense fallback={<Skeleton className="w-24 h-5" />}>
-                                <MaterialCount searchParams={resolvedParams} />
-                            </Suspense>
+                            <ItemsPerPageDropdown />
                             <TypeToggle />
                         </div>
                         <Suspense fallback={<MaterialsTableSkeleton />}>

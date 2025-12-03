@@ -246,8 +246,14 @@ export async function getMaterials(filters?: {
   mediumId?: string
   subjectId?: string
   type?: string
+  page?: number
+  limit?: number
 }) {
   const supabase = await createClient()
+  const page = filters?.page || 1
+  const limit = filters?.limit || 10
+  const from = (page - 1) * limit
+  const to = from + limit - 1
 
   let query = supabase
     .from('materials')
@@ -256,7 +262,7 @@ export async function getMaterials(filters?: {
       grades (id, name),
       mediums (id, name),
       subjects (id, name)
-    `)
+    `, { count: 'exact' })
     .order('created_at', { ascending: false })
 
   if (filters?.gradeId) {
@@ -272,12 +278,61 @@ export async function getMaterials(filters?: {
     query = query.eq('type', filters.type)
   }
 
-  const { data, error } = await query
+  const { data, error, count } = await query.range(from, to)
 
   if (error) {
     console.error('Error fetching materials:', error)
-    return []
+    return { data: [], totalCount: 0, totalPages: 0 }
   }
 
-  return data || []
+  return {
+    data: data || [],
+    totalCount: count || 0,
+    totalPages: count ? Math.ceil(count / limit) : 0
+  }
+}
+
+export async function getCreatorMaterials(page: number = 1, limit: number = 10, type?: string) {
+  const supabase = await createClient()
+
+  // Phase 2: Real Auth Check
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: [], totalCount: 0, totalPages: 0 }
+
+  const creatorId = user.id
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  let query = supabase
+    .from('materials')
+    .select(`
+        id,
+        title,
+        description,
+        type,
+        url,
+        created_at,
+        grades (name),
+        mediums (name),
+        subjects (name)
+    `, { count: 'exact' })
+    .eq('creator_id', creatorId)
+    .order('created_at', { ascending: false })
+
+  if (type && type !== 'all') {
+    query = query.eq('type', type)
+  }
+
+  const { data, error, count } = await query.range(from, to)
+
+  if (error) {
+    console.error("Error fetching materials:", error)
+    return { data: [], totalCount: 0, totalPages: 0 }
+  }
+
+  return {
+    data: data || [],
+    totalCount: count || 0,
+    totalPages: count ? Math.ceil(count / limit) : 0
+  }
 }
