@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { headers } from 'next/headers'
 
 const authSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -78,7 +79,7 @@ export async function signup(prevState: AuthFormState, formData: FormData): Prom
                 full_name: fullName,
                 role: 'creator', // Force creator role for now
             },
-            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            emailRedirectTo: `${(await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
         },
     })
 
