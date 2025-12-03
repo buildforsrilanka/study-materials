@@ -28,13 +28,11 @@ export default function TypeToggle() {
                     <LayoutGrid className="w-3.5 h-3.5 mr-2" />
                     All
                 </TabsTrigger>
-                <TabsTrigger value="pdf" className="text-xs px-3 cursor-pointer">
-                    <FileText className="w-3.5 h-3.5 mr-2" />
-                    PDF
+                <TabsTrigger value="pdf" className="px-3 cursor-pointer" title="PDF">
+                    <FileText className="w-4 h-4" />
                 </TabsTrigger>
-                <TabsTrigger value="youtube" className="text-xs px-3 cursor-pointer">
-                    <Youtube className="w-3.5 h-3.5 mr-2" />
-                    YouTube
+                <TabsTrigger value="youtube" className="px-3 cursor-pointer" title="YouTube">
+                    <Youtube className="w-4 h-4" />
                 </TabsTrigger>
             </TabsList>
         </Tabs>

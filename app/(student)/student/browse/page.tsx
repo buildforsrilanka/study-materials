@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import BackButton from '@/components/BackButton'
 import SidebarPagination from '@/components/student/SidebarPagination'
 import ItemsPerPageDropdown from '@/components/ItemsPerPageDropdown'
+import SearchInput from '@/components/SearchInput'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +21,7 @@ interface BrowsePageProps {
         type?: string
         page?: string
         limit?: string
+        search?: string
     }>
 }
 
@@ -51,9 +53,12 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     </div>
 
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between px-1 h-9">
-                            <ItemsPerPageDropdown />
-                            <TypeToggle />
+                        <div className="flex items-center justify-between">
+                            <SearchInput />
+                            <div className="flex items-center gap-6">
+                                <ItemsPerPageDropdown />
+                                <TypeToggle />
+                            </div>
                         </div>
                         <Suspense fallback={<MaterialsTableSkeleton />}>
                             <MaterialsList searchParams={resolvedParams} />

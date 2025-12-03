@@ -3,9 +3,12 @@ import { getCreatorMaterials } from "@/lib/actions/materials"
 import CreatorMaterialsTable from "@/components/creator/CreatorMaterialsTable"
 import ItemsPerPageDropdown from "@/components/ItemsPerPageDropdown"
 import TypeToggle from "@/components/TypeToggle"
+import SearchInput from "@/components/SearchInput"
+import CreatorMaterialsTableSkeleton from "@/components/creator/CreatorMaterialsTableSkeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 import { Plus } from "lucide-react"
 import BackButton from "@/components/BackButton"
 
@@ -14,6 +17,7 @@ interface DashboardPageProps {
         page?: string
         limit?: string
         type?: string
+        search?: string
     }>
 }
 
@@ -28,7 +32,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     const page = Number((await searchParams).page) || 1
     const limit = Number((await searchParams).limit) || 10
     const type = (await searchParams).type
-    const { data: materials, totalPages } = await getCreatorMaterials(page, limit, type)
+    const search = (await searchParams).search
+    const { data: materials, totalPages } = await getCreatorMaterials(page, limit, type, search)
 
     // Transform the data to match the expected type
     // Supabase returns arrays for joined tables if not using single(), but our types expect objects
@@ -61,15 +66,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </div>
 
             <div className="flex justify-between items-center mb-4">
-                <ItemsPerPageDropdown />
-                <TypeToggle />
+                <SearchInput />
+                <div className="flex items-center gap-6">
+                    <ItemsPerPageDropdown />
+                    <TypeToggle />
+                </div>
             </div>
 
-            <CreatorMaterialsTable
-                materials={formattedMaterials as any}
-                currentPage={page}
-                totalPages={totalPages}
-            />
+            <Suspense fallback={<CreatorMaterialsTableSkeleton />}>
+                <CreatorMaterialsTable
+                    materials={formattedMaterials as any}
+                    currentPage={page}
+                    totalPages={totalPages}
+                />
+            </Suspense>
         </div>
     )
 }

@@ -248,6 +248,7 @@ export async function getMaterials(filters?: {
   type?: string
   page?: number
   limit?: number
+  search?: string
 }) {
   const supabase = await createClient()
   const page = filters?.page || 1
@@ -277,6 +278,9 @@ export async function getMaterials(filters?: {
   if (filters?.type && filters.type !== 'all') {
     query = query.eq('type', filters.type)
   }
+  if (filters?.search) {
+    query = query.ilike('title', `%${filters.search}%`)
+  }
 
   const { data, error, count } = await query.range(from, to)
 
@@ -292,7 +296,7 @@ export async function getMaterials(filters?: {
   }
 }
 
-export async function getCreatorMaterials(page: number = 1, limit: number = 10, type?: string) {
+export async function getCreatorMaterials(page: number = 1, limit: number = 10, type?: string, search?: string) {
   const supabase = await createClient()
 
   // Phase 2: Real Auth Check
@@ -321,6 +325,10 @@ export async function getCreatorMaterials(page: number = 1, limit: number = 10, 
 
   if (type && type !== 'all') {
     query = query.eq('type', type)
+  }
+
+  if (search) {
+    query = query.ilike('title', `%${search}%`)
   }
 
   const { data, error, count } = await query.range(from, to)

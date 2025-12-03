@@ -10,6 +10,7 @@ interface MaterialsListProps {
         type?: string
         page?: string
         limit?: string
+        search?: string
     }
 }
 
@@ -22,7 +23,8 @@ export default async function MaterialsList({ searchParams }: MaterialsListProps
         subjectId: searchParams.subject,
         type: searchParams.type,
         page,
-        limit
+        limit,
+        search: searchParams.search
     })
 
     // Cast the data to match the component's expected type
