@@ -78,8 +78,7 @@ export async function signup(prevState: AuthFormState, formData: FormData): Prom
             data: {
                 full_name: fullName,
                 role: 'creator', // Force creator role for now
-            },
-            emailRedirectTo: `${(await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+            }
         },
     })
 
