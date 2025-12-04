@@ -319,8 +319,8 @@ ORDER BY tablename;
 --       ON DELETE RESTRICT;
 --
 --     RAISE NOTICE 'Materials table updated: subject_id is now NOT NULL';
-  END IF;
-END $$;
+--   END IF;
+-- END $$;
 
 -- =============================================
 -- TRIGGER: HANDLE NEW USER
