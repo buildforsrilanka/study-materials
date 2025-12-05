@@ -1,0 +1,29 @@
+# Ignore artifacts
+node_modules
+build
+dist
+.next
+out
+
+# Ignore all HTML files
+*.html
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+
+# Ignore dotfiles
+.DS_Store
+.env
+.env.*
+
+# Ignore dependencies
+.pnp
+.pnp.js
+
+# OS
+.vscode
+.idea
+*.swp
+*.swo
+*~
