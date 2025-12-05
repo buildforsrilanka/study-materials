@@ -81,7 +81,7 @@ npm run dev
 
 ## Setting up Supabase 
 
-Refer this video link for how to setup the Supabase for your project: [Get up and running](https://youtu.be/EYTAJsOgzPo)
+See this video for how to set up Supabase for your project: [Get up and running](https://youtu.be/EYTAJsOgzPo)
 
 ## Project Structure
 
