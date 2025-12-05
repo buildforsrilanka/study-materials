@@ -79,6 +79,10 @@ npm run dev
 
 6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+## Setting up Supabase 
+
+Refer this video link for how to setup the Supabase for your project: [Get up and running](https://youtu.be/EYTAJsOgzPo)
+
 ## Project Structure
 
 ```
