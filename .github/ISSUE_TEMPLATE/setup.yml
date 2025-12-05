@@ -1,0 +1,61 @@
+name: Setup Workflow
+description: Questions about project setup and configuration
+title: "[SETUP] "
+labels: ["question", "documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest in Study Materials Platform! Please describe your setup question.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Setup Question
+      description: What are you trying to do?
+      placeholder: "I'm trying to... but I'm not sure how to..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: node_version
+    attributes:
+      label: Node.js Version
+      placeholder: "18.0.0"
+      description: Run `node --version` to find this
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: What Steps Have You Already Tried?
+      placeholder: |
+        1. I tried...
+        2. I also tried...
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Messages or Logs
+      description: If you received any error messages, please paste them here
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have checked the README and CONTRIBUTING guide
+        - label: I have searched existing issues for similar questions
+        - label: I have provided all necessary information

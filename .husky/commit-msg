@@ -1,0 +1,39 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Validate commit message format
+# Format: type(scope): subject [TICKET-ID]
+
+COMMIT_MSG=$(cat "$1")
+
+# Allow merge commits
+if echo "$COMMIT_MSG" | grep -qE "^Merge pull request"; then
+  exit 0
+fi
+
+# Allow revert commits
+if echo "$COMMIT_MSG" | grep -qE "^revert"; then
+  exit 0
+fi
+
+# Validate commit message format
+if ! echo "$COMMIT_MSG" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|release|deps)(\(.+\))?!?: .{1,}"; then
+  echo "❌ Invalid commit message format"
+  echo ""
+  echo "Expected format:"
+  echo "  <type>(<scope>): <subject> [TICKET-ID]"
+  echo ""
+  echo "Example:"
+  echo "  feat(auth): add two-factor authentication [PROJ-123]"
+  echo ""
+  echo "Valid types: feat, fix, docs, style, refactor, perf, test, chore, build, ci, release, deps"
+  echo ""
+  exit 1
+fi
+
+# Check line length (72 characters)
+if echo "$COMMIT_MSG" | head -n 1 | grep -qE ".{73,}"; then
+  echo "⚠️  Warning: First line exceeds 72 characters (recommended limit)"
+fi
+
+exit 0
