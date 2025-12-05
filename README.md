@@ -81,8 +81,21 @@ npm run dev
 
 ## Setting up Supabase 
 
-See this video for how to set up Supabase for your project: [Get up and running](https://youtu.be/EYTAJsOgzPo)
+To set up Supabase for this project, follow these steps:
 
+1. **Create a Supabase project**  
+   - Go to [https://app.supabase.com/](https://app.supabase.com/) and sign in or create an account.  
+   - Click "New Project" and fill in the required details.
+2. **Obtain your Supabase API keys**  
+   - In your Supabase project dashboard, go to "Project Settings" > "API".  
+   - Copy the `SUPABASE_URL` and `SUPABASE_ANON_KEY` and add them to your `.env.local` file.
+3. **Set up the database schema**  
+   - In the Supabase dashboard, go to "Table Editor" and create tables for subjects, materials, users, etc.  
+   - You can find example schema definitions in the `/supabase/schema.sql` file (if provided), or refer to the video for details.
+4. **Enable authentication**  
+   - Go to "Authentication" in the Supabase dashboard and configure sign-up/sign-in settings as needed.
+
+See this video for a walkthrough of the Supabase setup: [Get up and running](https://youtu.be/EYTAJsOgzPo)
 ## Project Structure
 
 ```
